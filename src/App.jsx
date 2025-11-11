@@ -1,28 +1,52 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import Header from './Header'
+import ProductGrid from './ProductGrid'
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [seedMessage, setSeedMessage] = useState("")
+
+  // Try seeding products once on first load (safe: backend skips if already seeded)
+  useEffect(() => {
+    const seed = async () => {
+      try {
+        const base = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+        const res = await fetch(`${base}/api/seed`, { method: 'POST' })
+        if (res.ok) {
+          const d = await res.json()
+          if (d.seeded) setSeedMessage(`Added ${d.count} products`)
+        }
+      } catch {}
+    }
+    seed()
+  }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Vibe Coding Platform
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Your AI-powered development environment
-        </p>
-        <div className="text-center">
-          <button
-            onClick={() => setCount(count + 1)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Count is {count}
-          </button>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 text-gray-900">
+      <Header onCartClick={() => alert('Cart coming soon')} />
+
+      <section className="max-w-6xl mx-auto px-4 pt-12 pb-6 text-center">
+        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">dyfn apparel</h1>
+        <p className="mt-3 text-gray-600">Premium tees and hoodies built for everyday comfort.</p>
+        {seedMessage && <p className="mt-2 text-xs text-green-600">{seedMessage}</p>}
+      </section>
+
+      <section id="tshirts" className="max-w-6xl mx-auto px-4 py-8">
+        <div className="flex items-end justify-between mb-4">
+          <h2 className="text-2xl font-bold">T‑Shirts</h2>
+          <a href="#hoodies" className="text-sm text-black/60 hover:text-black">See hoodies ↓</a>
         </div>
-      </div>
+        <ProductGrid category="tshirt" />
+      </section>
+
+      <section id="hoodies" className="max-w-6xl mx-auto px-4 py-8">
+        <div className="flex items-end justify-between mb-4">
+          <h2 className="text-2xl font-bold">Hoodies</h2>
+          <a href="#top" className="text-sm text-black/60 hover:text-black">Back to top ↑</a>
+        </div>
+        <ProductGrid category="hoodie" />
+      </section>
+
+      <footer className="border-t mt-12 py-8 text-center text-sm text-black/60">© {new Date().getFullYear()} dyfn. All rights reserved.</footer>
     </div>
   )
 }
-
-export default App
